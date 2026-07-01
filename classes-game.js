@@ -20,6 +20,5 @@ function checkAnswer(selectedOptionIndex) {
         quizState.isQuizFinished = true;
     }
 
-    updateUI(); 
+    updateUI();
 }
-//////////////////////////////////////////////////////////////
