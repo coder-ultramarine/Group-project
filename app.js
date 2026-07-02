@@ -1,8 +1,7 @@
-class GameLibraryApp {
-  constructor(root) {
-    this.root = root;
-    this.userStorageKey = 'game-library-users';
-    this.currentUserKey = 'game-library-current-user';
+class SteamUser {
+  constructor() {
+    this.storageKey = 'keam-users';
+    this.currentUserKey = 'keam-current-user';
     this.users = this.loadUsers();
     this.currentUser = this.loadCurrentUser();
     this.games = [
@@ -113,9 +112,9 @@ class GameLibraryApp {
 
   buildAuthPage() {
     return `
-      <div style="max-width: 460px; margin: 40px auto; padding: 24px; font-family: Arial, sans-serif; background: #111; color: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-        <h1 style="margin-top:0;">Game Hub</h1>
-        <p style="color:#bbb;">Choose sign in or log in to browse the game library.</p>
+      <div class="panel">
+        <h1 style="${this.randomTextStyle()}">Keam App</h1>
+        <p style="${this.randomTextStyle()}">Make an account and talk to your friends.</p>
 
         <div style="display:flex; gap:10px; margin-bottom: 16px;">
           <button type="button" id="show-signin" style="flex:1; padding:10px; border:none; border-radius:8px; background:#8b5cf6; color:white; cursor:pointer;">Sign In</button>
