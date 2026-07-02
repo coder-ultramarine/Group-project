@@ -63,7 +63,6 @@
     grid-template-columns: 1fr; /* Stack buttons vertically on mobile phones */
   }
 }
-=======
 :root {
   --bg: #050816;
   --panel: rgba(12, 20, 38, 0.95);
@@ -285,4 +284,3 @@ body {
     padding: 20px 18px;
   }
 }
->>>>>>> Stashed changes
