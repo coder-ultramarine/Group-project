@@ -1,0 +1,64 @@
+/* Main container layout */
+.quest-container {
+  max-width: 800px;
+  margin: 50px auto;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.question-text {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+/* 2x2 Layout for the answer buttons */
+.answers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns, equal width */
+  gap: 20px; /* Space between buttons */
+  padding: 10px;
+}
+
+/* Base button styling */
+.answer-btn {
+  padding: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.3s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Hover effects */
+.answer-btn:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.1); /* Slightly brightens the button */
+}
+
+/* Initial Kahoot-style colors */
+.btn-red { background-color: #e21b3c; }
+.btn-blue { background-color: #1368ce; }
+.btn-yellow { background-color: #d89e00; }
+.btn-green { background-color: #26890c; }
+
+/* STATE CLASSES (Triggered on click) */
+.answer-btn.correct {
+  background-color: #2ecc71 !important; /* Vivid Green for the correct answer */
+  transform: scale(1.02);
+}
+
+.answer-btn.wrong {
+  background-color: #e74c3c !important; /* Pure Red for the wrong answer */
+  opacity: 0.6; /* Slightly fade out the wrong answer to let the correct one pop */
+}
+
+/* Mobile Responsive adjustment */
+@media (max-width: 600px) {
+  .answers-grid {
+    grid-template-columns: 1fr; /* Stack buttons vertically on mobile phones */
+  }
+}
