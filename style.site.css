@@ -1,0 +1,200 @@
+<<<<<<< Updated upstream
+=======
+:root {
+  color-scheme: dark;
+  --bg: #060b12;
+  --panel: #111827;
+  --panel-2: #172033;
+  --text: #f2f5f8;
+  --muted: #93a0b3;
+  --accent: #66c0f4;
+  --accent-2: #7ee787;
+  --danger: #ff7b7b;
+  --border: rgba(255,255,255,0.08);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top, rgba(102,192,244,0.18), transparent 28%), var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+#app { min-height: 100vh; }
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, #0f1727 0%, #0b1220 100%);
+  border-right: 1px solid var(--border);
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.brand-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(102,192,244,0.16);
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+}
+
+.sidebar-card,
+.panel,
+.auth-card,
+.hero-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-link {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+}
+
+.nav-link:hover { background: rgba(102,192,244,0.13); }
+
+.main {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 22px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 18px;
+}
+
+.hero-card h1 { margin: 0 0 6px; font-size: 1.9rem; }
+.hero-card p { margin: 0; color: var(--muted); }
+
+.hero-actions,
+.form-row,
+.request-actions,
+.friend-row,
+.chat-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px;
+}
+
+.panel h2, .panel h3 { margin-top: 0; }
+
+.input,
+.select,
+textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+}
+
+textarea { min-height: 90px; resize: vertical; }
+
+.btn {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+
+.btn:hover { background: rgba(102,192,244,0.14); }
+.btn-primary { background: linear-gradient(135deg, var(--accent), #3f7ce5); border-color: transparent; }
+.btn-danger { background: rgba(255,123,123,0.16); }
+.btn-small { padding: 7px 10px; font-size: 0.9rem; }
+
+.game-list, .friend-list, .request-list, .message-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.game-card, .friend-card, .request-card, .message-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.game-card strong, .friend-card strong { display: block; margin-bottom: 4px; }
+.meta, .muted { color: var(--muted); }
+.tag { display: inline-block; margin-top: 6px; padding: 4px 8px; border-radius: 999px; background: rgba(102,192,244,0.14); color: var(--accent); font-size: 0.8rem; }
+
+.auth-card {
+  max-width: 480px;
+  margin: 60px auto;
+  display: grid;
+  gap: 12px;
+}
+
+.auth-tabs { display: flex; gap: 10px; }
+
+.status { margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03); }
+.status.success { color: var(--accent-2); }
+.status.error { color: var(--danger); }
+
+.message-card.mine { border-color: rgba(126,231,135,0.3); }
+.message-card.theirs { border-color: rgba(102,192,244,0.25); }
+
+@media (max-width: 980px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  .hero, .dashboard-grid { grid-template-columns: 1fr; }
+}
+>>>>>>> Stashed changes
