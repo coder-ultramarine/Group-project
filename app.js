@@ -1,28 +1,34 @@
-class SteamUser {
-  constructor() {
-    this.storageKey = 'steam-users';
-    this.currentUserKey = 'steam-current-user';
+class GameLibraryApp {
+  constructor(root) {
+    this.root = root;
+    this.userStorageKey = 'game-library-users';
+    this.currentUserKey = 'game-library-current-user';
     this.users = this.loadUsers();
     this.currentUser = this.loadCurrentUser();
+    this.games = [
+      { title: 'The Witcher 3', genre: 'RPG' },
+      { title: 'Hades', genre: 'Action' },
+      { title: 'Portal 2', genre: 'Puzzle' },
+      { title: 'Celeste', genre: 'Platformer' },
+      { title: 'Minecraft', genre: 'Sandbox' },
+      { title: 'Stardew Valley', genre: 'Simulation' },
+      { title: 'Baldur\'s Gate 3', genre: 'RPG' },
+      { title: 'Hollow Knight', genre: 'Metroidvania' }
+    ];
+    this.searchTerm = '';
+    this.render();
   }
 
   loadUsers() {
     try {
-      return (JSON.parse(localStorage.getItem(this.storageKey)) || []).map(user => ({
-        username: user.username,
-        password: user.password,
-        friends: user.friends || [],
-        messages: user.messages || {},
-        incomingRequests: user.incomingRequests || [],
-        outgoingRequests: user.outgoingRequests || []
-      }));
+      return JSON.parse(localStorage.getItem(this.userStorageKey)) || [];
     } catch {
       return [];
     }
   }
 
   saveUsers() {
-    localStorage.setItem(this.storageKey, JSON.stringify(this.users));
+    localStorage.setItem(this.userStorageKey, JSON.stringify(this.users));
   }
 
   saveCurrentUser(user) {
@@ -43,33 +49,24 @@ class SteamUser {
     }
   }
 
-  signUp(username, password) {
+  signIn(username, password) {
     const cleanName = username.trim().toLowerCase();
     const cleanPassword = password.trim();
 
     if (!cleanName || !cleanPassword) {
-      return { success: false, message: 'Please write a username and password.' };
+      return { success: false, message: 'Please enter a username and password.' };
     }
 
     if (this.users.some(user => user.username === cleanName)) {
       return { success: false, message: 'That username already exists.' };
     }
 
-    const newUser = {
-      username: cleanName,
-      password: cleanPassword,
-      friends: [],
-      messages: {},
-      incomingRequests: [],
-      outgoingRequests: []
-    };
-
+    const newUser = { username: cleanName, password: cleanPassword };
     this.users.push(newUser);
     this.currentUser = newUser;
     this.saveUsers();
     this.saveCurrentUser(newUser);
-
-    return { success: true, message: `Welcome, ${cleanName}!`, user: newUser };
+    return { success: true, message: `Welcome, ${cleanName}!` };
   }
 
   login(username, password) {
@@ -83,7 +80,7 @@ class SteamUser {
 
     this.currentUser = user;
     this.saveCurrentUser(user);
-    return { success: true, message: `You are logged in as ${user.username}.`, user };
+    return { success: true, message: `Logged in as ${user.username}.` };
   }
 
   logout() {
@@ -92,429 +89,137 @@ class SteamUser {
     return { success: true, message: 'You logged out.' };
   }
 
-  addFriend(friendName) {
-    const cleanName = friendName.trim();
+  getFilteredGames() {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.games;
 
-    if (!cleanName) {
-      return { success: false, message: 'Please write a friend name.' };
-    }
-
-    if (!this.currentUser) {
-      return { success: false, message: 'Please log in first.' };
-    }
-
-    const targetUser = this.users.find(user => user.username === cleanName);
-    if (!targetUser) {
-      return { success: false, message: 'That user does not exist.' };
-    }
-
-    if (this.currentUser.friends.includes(cleanName)) {
-      return { success: false, message: 'This friend is already in your list.' };
-    }
-
-    if (this.currentUser.outgoingRequests.includes(cleanName)) {
-      return { success: false, message: 'A request is already waiting for this user.' };
-    }
-
-    this.currentUser.outgoingRequests.push(cleanName);
-    targetUser.incomingRequests.push(this.currentUser.username);
-    this.saveUsers();
-    this.saveCurrentUser(this.currentUser);
-
-    return { success: true, message: `Friend request sent to ${cleanName}.` };
-  }
-
-  acceptFriendRequest(friendName) {
-    const requester = this.users.find(user => user.username === friendName);
-    if (!requester) {
-      return { success: false, message: 'That user does not exist.' };
-    }
-
-    this.currentUser.incomingRequests = this.currentUser.incomingRequests.filter(name => name !== friendName);
-    requester.outgoingRequests = requester.outgoingRequests.filter(name => name !== this.currentUser.username);
-
-    if (!this.currentUser.friends.includes(friendName)) {
-      this.currentUser.friends.push(friendName);
-    }
-
-    if (!requester.friends.includes(this.currentUser.username)) {
-      requester.friends.push(this.currentUser.username);
-    }
-
-    this.currentUser.messages[friendName] = this.currentUser.messages[friendName] || [];
-    requester.messages[this.currentUser.username] = requester.messages[this.currentUser.username] || [];
-
-    this.saveUsers();
-    this.saveCurrentUser(this.currentUser);
-    return { success: true, message: `You are now friends with ${friendName}.` };
-  }
-
-  declineFriendRequest(friendName) {
-    const requester = this.users.find(user => user.username === friendName);
-    if (!requester) {
-      return { success: false, message: 'That user does not exist.' };
-    }
-
-    this.currentUser.incomingRequests = this.currentUser.incomingRequests.filter(name => name !== friendName);
-    requester.outgoingRequests = requester.outgoingRequests.filter(name => name !== this.currentUser.username);
-
-    this.saveUsers();
-    this.saveCurrentUser(this.currentUser);
-    return { success: true, message: `Friend request from ${friendName} declined.` };
-  }
-
-  removeFriend(friendName) {
-    this.currentUser.friends = this.currentUser.friends.filter(name => name !== friendName);
-    delete this.currentUser.messages[friendName];
-    this.saveUsers();
-    this.saveCurrentUser(this.currentUser);
-    return { success: true, message: `${friendName} removed from your friends list.` };
-  }
-
-  sendMessage(friendName, messageText) {
-    const cleanFriend = friendName.trim();
-    const cleanMessage = messageText.trim();
-
-    if (!this.currentUser) {
-      return { success: false, message: 'Please log in first.' };
-    }
-
-    if (!cleanFriend || !this.currentUser.friends.includes(cleanFriend)) {
-      return { success: false, message: 'Select a valid friend first.' };
-    }
-
-    if (!cleanMessage) {
-      return { success: false, message: 'Please write a message.' };
-    }
-
-    const recipientUser = this.users.find(user => user.username === cleanFriend);
-    if (!recipientUser) {
-      return { success: false, message: 'That friend could not be found.' };
-    }
-
-    const time = new Date().toLocaleTimeString();
-
-    this.currentUser.messages[cleanFriend] = this.currentUser.messages[cleanFriend] || [];
-    this.currentUser.messages[cleanFriend].push({ sender: 'you', text: cleanMessage, time });
-
-    recipientUser.messages[this.currentUser.username] = recipientUser.messages[this.currentUser.username] || [];
-    recipientUser.messages[this.currentUser.username].push({ sender: 'friend', text: cleanMessage, time });
-
-    this.saveUsers();
-    this.saveCurrentUser(this.currentUser);
-    return { success: true, message: 'Message sent.' };
-  }
-
-  getAvailableUsers() {
-    if (!this.currentUser) return [];
-
-    return this.users
-      .filter(user => user.username !== this.currentUser.username)
-      .filter(user => !this.currentUser.friends.includes(user.username))
-      .filter(user => !this.currentUser.outgoingRequests.includes(user.username))
-      .filter(user => !this.currentUser.incomingRequests.includes(user.username))
-      .map(user => user.username);
-  }
-
-  getCurrentUser() {
-    return this.currentUser;
-  }
-}
-
-class SteamApp {
-  constructor() {
-    this.app = document.getElementById('app');
-    this.auth = new SteamUser();
-    this.selectedFriend = null;
-    this.render();
-  }
-
-  randomButtonStyle() {
-    const y = Math.random() > 0.5 ? 'top' : 'bottom';
-    const x = Math.random() > 0.5 ? 'left' : 'right';
-    const yValue = Math.floor(Math.random() * 70) + 5;
-    const xValue = Math.floor(Math.random() * 70) + 5;
-    const rotate = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 35) + 5);
-    const scale = (0.9 + Math.random() * 0.6).toFixed(2);
-    const padding = Math.floor(Math.random() * 6) + 8;
-    const fontSize = Math.floor(Math.random() * 5) + 12;
-
-    return `${y}:${yValue}%; ${x}:${xValue}%; transform: rotate(${rotate}deg) scale(${scale}); padding:${padding}px ${padding + 4}px; font-size:${fontSize}px;`;
-  }
-
-  randomTextStyle() {
-    const rotate = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 20) + 3);
-    const scale = (0.95 + Math.random() * 0.35).toFixed(2);
-    const fontSize = Math.floor(Math.random() * 7) + 14;
-    return `transform: rotate(${rotate}deg) scale(${scale}); font-size:${fontSize}px; display:inline-block;`;
-  }
-
-  randomInputStyle() {
-    const rotate = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 10) + 2);
-    const scale = (0.95 + Math.random() * 0.2).toFixed(2);
-    const width = Math.floor(Math.random() * 80) + 140;
-    return `transform: rotate(${rotate}deg) scale(${scale}); width:${width}px; max-width:100%;`;
+    return this.games.filter(game => {
+      return game.title.toLowerCase().includes(term) || game.genre.toLowerCase().includes(term);
+    });
   }
 
   render() {
-    const currentUser = this.auth.getCurrentUser();
+    if (!this.root) return;
 
-    if (!currentUser) {
-      this.app.innerHTML = this.buildLoginPage();
-      this.bindLoginEvents();
+    if (!this.currentUser) {
+      this.root.innerHTML = this.buildAuthPage();
+      this.bindAuthEvents();
       return;
     }
 
-    this.app.innerHTML = this.buildMainPage(currentUser);
-    this.bindMainEvents();
+    this.root.innerHTML = this.buildLibraryPage();
+    this.bindLibraryEvents();
   }
 
-  buildLoginPage() {
+  buildAuthPage() {
     return `
-      <div class="panel">
-        <h1 style="${this.randomTextStyle()}">Steam-like App</h1>
-        <p style="${this.randomTextStyle()}">Make an account and talk to your friends.</p>
+      <div style="max-width: 460px; margin: 40px auto; padding: 24px; font-family: Arial, sans-serif; background: #111; color: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <h1 style="margin-top:0;">Game Hub</h1>
+        <p style="color:#bbb;">Choose sign in or log in to browse the game library.</p>
 
-        <div class="controls">
-          <button class="btn floating-btn" style="${this.randomButtonStyle()}" id="show-signup">Sign Up</button>
-          <button class="btn floating-btn" style="${this.randomButtonStyle()}" id="show-login">Login</button>
+        <div style="display:flex; gap:10px; margin-bottom: 16px;">
+          <button type="button" id="show-signin" style="flex:1; padding:10px; border:none; border-radius:8px; background:#8b5cf6; color:white; cursor:pointer;">Sign In</button>
+          <button type="button" id="show-login" style="flex:1; padding:10px; border:none; border-radius:8px; background:#22c55e; color:white; cursor:pointer;">Log In</button>
         </div>
 
-        <form id="signup-form" class="auth-form">
-          <h2>Create an account</h2>
-          <input type="text" id="signup-username" placeholder="Username" style="${this.randomInputStyle()}" />
-          <input type="password" id="signup-password" placeholder="Password" style="${this.randomInputStyle()}" />
-          <button class="btn" type="submit" style="${this.randomButtonStyle()}">Create Account</button>
+        <form id="signin-form" style="margin-bottom: 20px;">
+          <h2>Sign In</h2>
+          <input id="signin-username" type="text" placeholder="Username" style="display:block; width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #444;" />
+          <input id="signin-password" type="password" placeholder="Password" style="display:block; width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #444;" />
+          <button type="submit" style="width:100%; padding:10px; border:none; border-radius:8px; background:#8b5cf6; color:white; cursor:pointer;">Create Account</button>
         </form>
 
-        <form id="login-form" class="auth-form hidden">
-          <h2>Login</h2>
-          <input type="text" id="login-username" placeholder="Username" style="${this.randomInputStyle()}" />
-          <input type="password" id="login-password" placeholder="Password" style="${this.randomInputStyle()}" />
-          <button class="btn" type="submit" style="${this.randomButtonStyle()}">Login</button>
+        <form id="login-form" style="display:none;">
+          <h2>Log In</h2>
+          <input id="login-username" type="text" placeholder="Username" style="display:block; width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #444;" />
+          <input id="login-password" type="password" placeholder="Password" style="display:block; width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #444;" />
+          <button type="submit" style="width:100%; padding:10px; border:none; border-radius:8px; background:#22c55e; color:white; cursor:pointer;">Log In</button>
         </form>
+        <p id="auth-message" style="margin-top: 16px; color:#fbbf24;"></p>
       </div>
     `;
   }
 
-  buildMainPage(user) {
-    return `
-      <div class="panel">
-        <h1 style="${this.randomTextStyle()}">Friends and Chat</h1>
-        <p style="${this.randomTextStyle()}">Hello ${user.username}</p>
+  buildLibraryPage() {
+    const games = this.getFilteredGames();
 
-        <div class="controls">
-          <button class="btn floating-btn danger" style="${this.randomButtonStyle()}" id="logout-btn">Logout</button>
+    return `
+      <div style="max-width: 760px; margin: 40px auto; padding: 24px; font-family: Arial, sans-serif; background: #111; color: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 16px;">
+          <div>
+            <h1 style="margin:0;">Welcome, ${this.currentUser.username}</h1>
+            <p style="margin:4px 0 0; color:#bbb;">Search the game library below.</p>
+          </div>
+          <button id="logout-btn" style="padding:10px 14px; border:none; border-radius:8px; background:#ef4444; color:white; cursor:pointer;">Log Out</button>
         </div>
 
-        <div class="section">
-          <h2>Friends</h2>
+        <input id="game-search" type="text" placeholder="Search games..." value="${this.searchTerm}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; margin-bottom: 16px;" />
 
-          <form id="add-friend-form" class="auth-form">
-            <input type="text" id="friend-name" placeholder="Add a friend" style="${this.randomInputStyle()}" />
-            <button class="btn" type="submit" style="${this.randomButtonStyle()}">Add Friend</button>
-          </form>
-
-          <div class="friends-layout">
-            <div class="friends-list">
-              <h3>Friends</h3>
-              ${this.buildFriendList(user)}
+        <div style="display:grid; gap:10px;">
+          ${games.length ? games.map(game => `
+            <div style="padding:12px 14px; border:1px solid #2a2a2a; border-radius:10px; background:#1a1a1a;">
+              <strong>${game.title}</strong>
+              <div style="color:#aaa; font-size: 14px; margin-top: 4px;">Genre: ${game.genre}</div>
             </div>
-
-            <div class="chat-panel">
-              <h3>Requests</h3>
-              ${this.buildRequests(user)}
-              ${this.buildChatArea(user)}
-            </div>
-          </div>
+          `).join('') : '<p style="color:#bbb;">No games found.</p>'}
         </div>
       </div>
     `;
   }
 
-  buildFriendList(user) {
-    const friends = user.friends || [];
-    if (!friends.length) return '<p>No friends yet.</p>';
+  bindAuthEvents() {
+    const signinForm = document.getElementById('signin-form');
+    const loginForm = document.getElementById('login-form');
+    const authMessage = document.getElementById('auth-message');
+    const showSigninBtn = document.getElementById('show-signin');
+    const showLoginBtn = document.getElementById('show-login');
 
-    return friends.map(friend => `
-      <div class="friend-row">
-        <button class="friend-button ${friend === this.selectedFriend ? 'active' : ''}" data-select-friend="${friend}">${friend}</button>
-        <button class="btn small danger" data-remove-friend="${friend}">Remove</button>
-      </div>
-    `).join('');
-  }
-
-  buildRequests(user) {
-    const incoming = user.incomingRequests || [];
-    const outgoing = user.outgoingRequests || [];
-    const available = this.auth.getAvailableUsers();
-
-    return `
-      <div class="request-block">
-        <strong>Incoming</strong>
-        ${incoming.length ? incoming.map(name => `
-          <div class="request-item">
-            <span>${name}</span>
-            <div class="request-actions">
-              <button class="btn small" data-accept-request="${name}">Accept</button>
-              <button class="btn small danger" data-decline-request="${name}">Decline</button>
-            </div>
-          </div>
-        `).join('') : '<p>No incoming requests.</p>'}
-      </div>
-
-      <div class="request-block">
-        <strong>Outgoing</strong>
-        ${outgoing.length ? outgoing.map(name => `
-          <div class="request-item">
-            <span>${name}</span>
-            <small>Pending</small>
-          </div>
-        `).join('') : '<p>No outgoing requests.</p>'}
-      </div>
-
-      <div class="request-block">
-        <strong>Available Friends</strong>
-        ${available.length ? available.map(name => `
-          <div class="request-item">
-            <span>${name}</span>
-            <button class="btn small" data-request-friend="${name}">Send Request</button>
-          </div>
-        `).join('') : '<p>No available friends.</p>'}
-      </div>
-    `;
-  }
-
-  buildChatArea(user) {
-    const friends = user.friends || [];
-    const selectedFriend = this.selectedFriend && friends.includes(this.selectedFriend) ? this.selectedFriend : friends[0] || null;
-
-    if (selectedFriend && this.selectedFriend !== selectedFriend) {
-      this.selectedFriend = selectedFriend;
-    }
-
-    if (!selectedFriend) {
-      return '<p>Select a friend to chat.</p>';
-    }
-
-    return `
-      <h3>${selectedFriend}</h3>
-      <div class="messages">
-        ${(user.messages[selectedFriend] || []).map(message => `
-          <div class="message ${message.sender === 'you' ? 'mine' : 'theirs'}">
-            <span>${message.text}</span>
-            <small>${message.time}</small>
-          </div>
-        `).join('')}
-      </div>
-      <form id="message-form" class="auth-form">
-        <input type="text" id="message-text" placeholder="Send a message" style="${this.randomInputStyle()}" />
-        <button class="btn" type="submit" style="${this.randomButtonStyle()}">Send</button>
-      </form>
-    `;
-  }
-
-  bindLoginEvents() {
-    document.getElementById('show-signup').addEventListener('click', () => {
-      document.getElementById('signup-form').classList.remove('hidden');
-      document.getElementById('login-form').classList.add('hidden');
+    showSigninBtn.addEventListener('click', () => {
+      signinForm.style.display = 'block';
+      loginForm.style.display = 'none';
     });
 
-    document.getElementById('show-login').addEventListener('click', () => {
-      document.getElementById('login-form').classList.remove('hidden');
-      document.getElementById('signup-form').classList.add('hidden');
+    showLoginBtn.addEventListener('click', () => {
+      signinForm.style.display = 'none';
+      loginForm.style.display = 'block';
     });
 
-    document.getElementById('signup-form').addEventListener('submit', event => {
+    signinForm.addEventListener('submit', event => {
       event.preventDefault();
-      const username = document.getElementById('signup-username').value;
-      const password = document.getElementById('signup-password').value;
-      const result = this.auth.signUp(username, password);
-      alert(result.message);
+      const username = document.getElementById('signin-username').value;
+      const password = document.getElementById('signin-password').value;
+      const result = this.signIn(username, password);
+      authMessage.textContent = result.message;
       if (result.success) this.render();
     });
 
-    document.getElementById('login-form').addEventListener('submit', event => {
+    loginForm.addEventListener('submit', event => {
       event.preventDefault();
       const username = document.getElementById('login-username').value;
       const password = document.getElementById('login-password').value;
-      const result = this.auth.login(username, password);
-      alert(result.message);
+      const result = this.login(username, password);
+      authMessage.textContent = result.message;
       if (result.success) this.render();
     });
   }
 
-  bindMainEvents() {
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      this.auth.logout();
+  bindLibraryEvents() {
+    const logoutBtn = document.getElementById('logout-btn');
+    const searchInput = document.getElementById('game-search');
+
+    logoutBtn.addEventListener('click', () => {
+      this.logout();
       this.render();
     });
 
-    document.getElementById('add-friend-form').addEventListener('submit', event => {
-      event.preventDefault();
-      const input = document.getElementById('friend-name');
-      const result = this.auth.addFriend(input.value);
-      alert(result.message);
-      input.value = '';
+    searchInput.addEventListener('input', event => {
+      this.searchTerm = event.target.value;
       this.render();
     });
-
-    document.querySelectorAll('[data-select-friend]').forEach(button => {
-      button.addEventListener('click', () => {
-        this.selectedFriend = button.getAttribute('data-select-friend');
-        this.render();
-      });
-    });
-
-    document.querySelectorAll('[data-remove-friend]').forEach(button => {
-      button.addEventListener('click', () => {
-        const friendName = button.getAttribute('data-remove-friend');
-        const result = this.auth.removeFriend(friendName);
-        alert(result.message);
-        this.render();
-      });
-    });
-
-    document.querySelectorAll('[data-accept-request]').forEach(button => {
-      button.addEventListener('click', () => {
-        const friendName = button.getAttribute('data-accept-request');
-        const result = this.auth.acceptFriendRequest(friendName);
-        alert(result.message);
-        this.selectedFriend = friendName;
-        this.render();
-      });
-    });
-
-    document.querySelectorAll('[data-decline-request]').forEach(button => {
-      button.addEventListener('click', () => {
-        const friendName = button.getAttribute('data-decline-request');
-        const result = this.auth.declineFriendRequest(friendName);
-        alert(result.message);
-        this.render();
-      });
-    });
-
-    document.querySelectorAll('[data-request-friend]').forEach(button => {
-      button.addEventListener('click', () => {
-        const friendName = button.getAttribute('data-request-friend');
-        const result = this.auth.addFriend(friendName);
-        alert(result.message);
-        this.render();
-      });
-    });
-
-    const messageForm = document.getElementById('message-form');
-    if (messageForm) {
-      messageForm.addEventListener('submit', event => {
-        event.preventDefault();
-        const input = document.getElementById('message-text');
-        const result = this.auth.sendMessage(this.selectedFriend, input.value);
-        alert(result.message);
-        input.value = '';
-        this.render();
-      });
-    }
   }
 }
 
-new SteamApp();
+const root = document.getElementById('app');
+if (root) {
+  new GameLibraryApp(root);
+}
