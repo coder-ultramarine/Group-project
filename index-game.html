@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Guess Quiz</title>
+  <link rel="stylesheet" href="game.style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">Game Guess Quiz</div>
+      <div class="score-pill">Score: <span id="score">0</span></div>
+    </header>
+
+    <main class="game-card">
+      <div class="progress" id="progressText">Question 1 / 20</div>
+      <h1 id="question">Loading quiz...</h1>
+      <div id="options" class="options"></div>
+      <div id="feedback" class="feedback" aria-live="polite"></div>
+      <button id="nextButton" class="next-button hidden">Next Question</button>
+    </main>
+  </div>
+
+  <script src="classes-game.js"></script>
+</body>
+</html>
