@@ -674,3 +674,4 @@ function render() {
 }
 
 render();
+  }}
