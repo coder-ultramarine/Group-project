@@ -403,7 +403,7 @@ function renderAuthPage() {
         <button class="btn ${state.authMode === 'signup' ? 'btn-primary' : ''}" data-auth-mode="signup">Create Account</button>
       </div>
 
-      <h1>Steam-style game hub</h1>
+      <h1>KEAM game hub</h1>
       <p class="muted">Sign up, build your library, add friends, and chat.</p>
 
       ${currentNotice ? `<p class="status ${currentNotice.isError ? 'error' : 'success'}">${currentNotice.message}</p>` : ''}
@@ -454,7 +454,7 @@ function renderAuthPage() {
 function renderMainPage() {
   const user = getCurrentUser();
   if (user) {
-    ensureSteamGamesInLibrary(user);
+    ensureLibraryGamesInLibrary(user);
   }
 
   const suggestion = getSuggestedGame();
