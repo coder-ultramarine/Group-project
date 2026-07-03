@@ -1,0 +1,7 @@
+﻿.quiz-iframe {
+  width: 100%;
+  min-height: 520px;
+  border: none;
+  border-radius: 16px;
+  background: #0f172a;
+}

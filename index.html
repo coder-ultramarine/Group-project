@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KEAM Library</title>
+  <link rel="stylesheet" href="style.site.css" />
+  <link rel="stylesheet" href="game.style.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand">KEAM Library</div>
+      <div class="brand-sub">Steam-style game hub</div>
+    </header>
+
+    <div class="quiz-launcher">
+      <button id="openQuizBtn" class="btn btn-primary" type="button">Open quiz</button>
+      <button id="closeQuizBtn" class="btn" type="button">Close quiz</button>
+    </div>
+
+    <div id="quizContent" class="quiz-content"></div>
+    <main id="app"></main>
+  </div>
+
+  <script src="classes.steam.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
