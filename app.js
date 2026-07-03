@@ -1,37 +1,4 @@
-const form = document.querySelector('#login-form');
-const statusEl = document.querySelector('#login-status');
 
-if (form) {
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const username = form.username.value.trim();
-        const password = form.password.value.trim();
-        const remember = form.remember.checked;
-
-        if (!username || !password) {
-            statusEl.textContent = 'Please enter both username and password.';
-            statusEl.style.color = '#ff8a8a';
-            return;
-        }
-
-        statusEl.textContent = 'Signing in...';
-        statusEl.style.color = '#a6d69d';
-
-        window.setTimeout(() => {
-            statusEl.textContent = `Welcome back, ${username}!`;
-            statusEl.style.color = '#9ff535';
-        }, 700);
-
-        console.log('Login attempt', { username, remember });
-    });
-}
-class SteamUser {
-  constructor() {
-    this.storageKey = 'steam-users';
-    this.currentUserKey = 'steam-current-user';
-    this.users = this.loadUsers();
-    this.currentUser = this.loadCurrentUser();
 const STORAGE_KEY = 'keam-library-state-v1';
 
 const initialUsers = [
@@ -124,6 +91,40 @@ function saveState() {
 
 function getCurrentUser() {
   return state.users.find((user) => user.username === state.currentUserName) || null;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function loadQuizPage() {
+  const container = document.getElementById('quizContent');
+  if (!container) return;
+
+  container.innerHTML = '<div class="quiz-loading">Loading quiz...</div>';
+
+  const iframe = document.createElement('iframe');
+  iframe.className = 'quiz-iframe';
+  iframe.src = 'index-game.html';
+  iframe.title = 'Game quiz';
+  iframe.setAttribute('loading', 'eager');
+
+  container.innerHTML = '';
+  container.appendChild(iframe);
+}
+
+function closeQuizPage() {
+  const container = document.getElementById('quizContent');
+  if (container) container.innerHTML = '';
+}
+
+function attachQuizLoader() {
+  document.getElementById('openQuizBtn')?.addEventListener('click', loadQuizPage);
+  document.getElementById('closeQuizBtn')?.addEventListener('click', closeQuizPage);
 }
 
 function ensureSteamGamesInLibrary(user) {
@@ -283,6 +284,7 @@ function addFriend(friendName) {
 }
 
 function acceptFriendRequest(friendName) {
+
   const user = getCurrentUser();
   const name = friendName.trim().toLowerCase();
   const requester = state.users.find((entry) => entry.username === name);
@@ -673,5 +675,6 @@ function render() {
   }
 }
 
+attachQuizLoader();
 render();
   }}
