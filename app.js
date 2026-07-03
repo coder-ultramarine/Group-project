@@ -677,4 +677,4 @@ function render() {
 
 attachQuizLoader();
 render();
-  }}
+  
