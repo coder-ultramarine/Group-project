@@ -583,7 +583,7 @@ if (root) {
 function renderMainPage() {
   const user = getCurrentUser();
   if (user) {
-    ensureSteamGamesInLibrary(user);
+    ensureLibraryGamesInLibrary(user);
   }
 
   const suggestion = getSuggestedGame();
