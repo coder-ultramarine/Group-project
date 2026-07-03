@@ -1,43 +1,21 @@
-
-const STORAGE_KEY = 'keam-library-state-v1';
-
-const initialUsers = [
-  {
-    username: 'player1',
-    password: 'steam123',
-    games: [
-      { id: 'g1', title: 'Portal 2', genre: 'Puzzle', year: 2011, status: 'Installed' },
-      { id: 'g2', title: 'Hades', genre: 'Action', year: 2020, status: 'Played' },
-      { id: 'g3', title: 'Cyberpunk 2077', genre: 'RPG', year: 2020, status: 'Installed' }
-    ],
-    friends: ['friend42', 'gamer22'],
-    messages: {},
-    incomingRequests: [],
-    outgoingRequests: []
-  },
-  {
-    username: 'friend42',
-    password: 'friendpass',
-    games: [
-      { id: 'g4', title: 'Half-Life 2', genre: 'Shooter', year: 2004, status: 'Installed' },
-      { id: 'g5', title: 'Terraria', genre: 'Adventure', year: 2011, status: 'Wishlist' }
-    ],
-    friends: ['player1'],
-    messages: {},
-    incomingRequests: [],
-    outgoingRequests: []
-  },
-  {
-    username: 'gamer22',
-    password: 'letsgame',
-    games: [
-      { id: 'g6', title: 'Stardew Valley', genre: 'Simulation', year: 2016, status: 'Played' },
-      { id: 'g7', title: 'The Witcher 3', genre: 'RPG', year: 2015, status: 'Installed' }
-    ],
-    friends: ['player1'],
-    messages: {},
-    incomingRequests: [],
-    outgoingRequests: []
+class SteamUser {
+  constructor() {
+    this.storageKey = 'keam-users';
+    this.currentUserKey = 'keam-current-user';
+    this.users = this.loadUsers();
+    this.currentUser = this.loadCurrentUser();
+    this.games = [
+      { title: 'The Witcher 3', genre: 'RPG' },
+      { title: 'Hades', genre: 'Action' },
+      { title: 'Portal 2', genre: 'Puzzle' },
+      { title: 'Celeste', genre: 'Platformer' },
+      { title: 'Minecraft', genre: 'Sandbox' },
+      { title: 'Stardew Valley', genre: 'Simulation' },
+      { title: 'Baldur\'s Gate 3', genre: 'RPG' },
+      { title: 'Hollow Knight', genre: 'Metroidvania' }
+    ];
+    this.searchTerm = '';
+    this.render();
   }
 ];
 
@@ -67,6 +45,7 @@ function loadState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
+      return JSON.parse(localStorage.getItem(this.userStorageKey)) || [];
       const parsed = JSON.parse(saved);
       state.users = parsed.users || [];
       state.currentUserName = parsed.currentUserName || null;
@@ -81,6 +60,9 @@ function loadState() {
   }
 }
 
+  saveUsers() {
+    localStorage.setItem(this.userStorageKey, JSON.stringify(this.users));
+  }
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     users: state.users,
@@ -101,6 +83,13 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;');
 }
 
+  signIn(username, password) {
+    const cleanName = username.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    if (!cleanName || !cleanPassword) {
+      return { success: false, message: 'Please enter a username and password.' };
+    }
 function loadQuizPage() {
   const container = document.getElementById('quizContent');
   if (!container) return;
@@ -113,6 +102,13 @@ function loadQuizPage() {
   iframe.title = 'Game quiz';
   iframe.setAttribute('loading', 'eager');
 
+    const newUser = { username: cleanName, password: cleanPassword };
+    this.users.push(newUser);
+    this.currentUser = newUser;
+    this.saveUsers();
+    this.saveCurrentUser(newUser);
+    return { success: true, message: `Welcome, ${cleanName}!` };
+  }
   container.innerHTML = '';
   container.appendChild(iframe);
 }
@@ -127,6 +123,9 @@ function attachQuizLoader() {
   document.getElementById('closeQuizBtn')?.addEventListener('click', closeQuizPage);
 }
 
+    this.currentUser = user;
+    this.saveCurrentUser(user);
+    return { success: true, message: `Logged in as ${user.username}.` };
 function ensureSteamGamesInLibrary(user) {
   if (!user || !Array.isArray(window.GAMES) || !window.GAMES.length) {
     return;
@@ -150,6 +149,53 @@ function ensureSteamGamesInLibrary(user) {
   }
 }
 
+  getFilteredGames() {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.games;
+
+    return this.games.filter(game => {
+      return game.title.toLowerCase().includes(term) || game.genre.toLowerCase().includes(term);
+    });
+  }
+
+  render() {
+    if (!this.root) return;
+
+    if (!this.currentUser) {
+      this.root.innerHTML = this.buildAuthPage();
+      this.bindAuthEvents();
+      return;
+    }
+
+    this.root.innerHTML = this.buildLibraryPage();
+    this.bindLibraryEvents();
+  }
+
+  buildAuthPage() {
+    return `
+      <div class="panel">
+        <h1 style="${this.randomTextStyle()}">Keam App</h1>
+        <p style="${this.randomTextStyle()}">Make an account and talk to your friends.</p>
+
+        <div style="display:flex; gap:10px; margin-bottom: 16px;">
+          <button type="button" id="show-signin" style="flex:1; padding:10px; border:none; border-radius:8px; background:#8b5cf6; color:white; cursor:pointer;">Sign In</button>
+          <button type="button" id="show-login" style="flex:1; padding:10px; border:none; border-radius:8px; background:#22c55e; color:white; cursor:pointer;">Log In</button>
+        </div>
+
+        <form id="signin-form" style="margin-bottom: 20px;">
+          <h2>Sign In</h2>
+          <input id="signin-username" type="text" placeholder="Username" style="display:block; width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #444;" />
+          <input id="signin-password" type="password" placeholder="Password" style="display:block; width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #444;" />
+          <button type="submit" style="width:100%; padding:10px; border:none; border-radius:8px; background:#8b5cf6; color:white; cursor:pointer;">Create Account</button>
+        </form>
+
+        <form id="login-form" style="display:none;">
+          <h2>Log In</h2>
+          <input id="login-username" type="text" placeholder="Username" style="display:block; width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #444;" />
+          <input id="login-password" type="password" placeholder="Password" style="display:block; width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #444;" />
+          <button type="submit" style="width:100%; padding:10px; border:none; border-radius:8px; background:#22c55e; color:white; cursor:pointer;">Log In</button>
+        </form>
+        <p id="auth-message" style="margin-top: 16px; color:#fbbf24;"></p>
 function setNotice(message, isError = false) {
   state.notice = { message, isError };
 }
@@ -403,6 +449,89 @@ function renderAuthPage() {
         <button class="btn ${state.authMode === 'signup' ? 'btn-primary' : ''}" data-auth-mode="signup">Create Account</button>
       </div>
 
+  buildLibraryPage() {
+    const games = this.getFilteredGames();
+
+    return `
+      <div style="max-width: 760px; margin: 40px auto; padding: 24px; font-family: Arial, sans-serif; background: #111; color: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 16px;">
+          <div>
+            <h1 style="margin:0;">Welcome, ${this.currentUser.username}</h1>
+            <p style="margin:4px 0 0; color:#bbb;">Search the game library below.</p>
+          </div>
+          <button id="logout-btn" style="padding:10px 14px; border:none; border-radius:8px; background:#ef4444; color:white; cursor:pointer;">Log Out</button>
+        </div>
+
+        <input id="game-search" type="text" placeholder="Search games..." value="${this.searchTerm}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #444; margin-bottom: 16px;" />
+
+        <div style="display:grid; gap:10px;">
+          ${games.length ? games.map(game => `
+            <div style="padding:12px 14px; border:1px solid #2a2a2a; border-radius:10px; background:#1a1a1a;">
+              <strong>${game.title}</strong>
+              <div style="color:#aaa; font-size: 14px; margin-top: 4px;">Genre: ${game.genre}</div>
+            </div>
+          `).join('') : '<p style="color:#bbb;">No games found.</p>'}
+        </div>
+      </div>
+    `;
+  }
+
+  bindAuthEvents() {
+    const signinForm = document.getElementById('signin-form');
+    const loginForm = document.getElementById('login-form');
+    const authMessage = document.getElementById('auth-message');
+    const showSigninBtn = document.getElementById('show-signin');
+    const showLoginBtn = document.getElementById('show-login');
+
+    showSigninBtn.addEventListener('click', () => {
+      signinForm.style.display = 'block';
+      loginForm.style.display = 'none';
+    });
+
+    showLoginBtn.addEventListener('click', () => {
+      signinForm.style.display = 'none';
+      loginForm.style.display = 'block';
+    });
+
+    signinForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const username = document.getElementById('signin-username').value;
+      const password = document.getElementById('signin-password').value;
+      const result = this.signIn(username, password);
+      authMessage.textContent = result.message;
+      if (result.success) this.render();
+    });
+
+    loginForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      const result = this.login(username, password);
+      authMessage.textContent = result.message;
+      if (result.success) this.render();
+    });
+  }
+
+  bindLibraryEvents() {
+    const logoutBtn = document.getElementById('logout-btn');
+    const searchInput = document.getElementById('game-search');
+
+    logoutBtn.addEventListener('click', () => {
+      this.logout();
+      this.render();
+    });
+
+    searchInput.addEventListener('input', event => {
+      this.searchTerm = event.target.value;
+      this.render();
+    });
+  }
+}
+
+const root = document.getElementById('app');
+if (root) {
+  new GameLibraryApp(root);
+}
       <h1>Steam-style game hub</h1>
       <p class="muted">Sign up, build your library, add friends, and chat.</p>
 
@@ -454,7 +583,7 @@ function renderAuthPage() {
 function renderMainPage() {
   const user = getCurrentUser();
   if (user) {
-    ensureSteamGamesInLibrary(user);
+    ensureLibraryGamesInLibrary(user);
   }
 
   const suggestion = getSuggestedGame();
