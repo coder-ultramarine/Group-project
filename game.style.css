@@ -1,68 +1,3 @@
-<<<<<<< Updated upstream
-/* Main container layout */
-.quest-container {
-  max-width: 800px;
-  margin: 50px auto;
-  text-align: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.question-text {
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 30px;
-}
-
-/* 2x2 Layout for the answer buttons */
-.answers-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns, equal width */
-  gap: 20px; /* Space between buttons */
-  padding: 10px;
-}
-
-/* Base button styling */
-.answer-btn {
-  padding: 25px;
-  font-size: 18px;
-  font-weight: bold;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s, background-color 0.3s;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-/* Hover effects */
-.answer-btn:hover {
-  transform: translateY(-3px);
-  filter: brightness(1.1); /* Slightly brightens the button */
-}
-
-/* Initial Kahoot-style colors */
-.btn-red { background-color: #e21b3c; }
-.btn-blue { background-color: #1368ce; }
-.btn-yellow { background-color: #d89e00; }
-.btn-green { background-color: #26890c; }
-
-/* STATE CLASSES (Triggered on click) */
-.answer-btn.correct {
-  background-color: #2ecc71 !important; /* Vivid Green for the correct answer */
-  transform: scale(1.02);
-}
-
-.answer-btn.wrong {
-  background-color: #e74c3c !important; /* Pure Red for the wrong answer */
-  opacity: 0.6; /* Slightly fade out the wrong answer to let the correct one pop */
-}
-
-/* Mobile Responsive adjustment */
-@media (max-width: 600px) {
-  .answers-grid {
-    grid-template-columns: 1fr; /* Stack buttons vertically on mobile phones */
-  }
-}
 :root {
   --bg: #050816;
   --panel: rgba(12, 20, 38, 0.95);
@@ -184,8 +119,8 @@ body {
 
 .option-btn {
   padding: 22px 24px;
-  min-height: 92px;
-  border-radius: 20px;
+  min-height: 110px;
+  border-radius: 24px;
   border: 2px solid rgba(255,255,255,0.2);
   background: linear-gradient(135deg, #1a5cff 0%, #7a3cff 45%, #ff5aa3 100%);
   color: white;
@@ -195,6 +130,27 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
   text-align: left;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  position: relative;
+  padding-left: 72px;
+  display: flex;
+  align-items: center;
+}
+
+.option-btn::before {
+  content: attr(data-label);
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  font-weight: 900;
+  color: white;
 }
 
 .option-btn:hover {
@@ -255,6 +211,74 @@ body {
   transform: translateY(-3px) scale(1.01);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
   filter: brightness(1.06);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+.brand {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f8fbff;
+}
+
+.score-pill {
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #f8fbff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.score-pill span {
+  font-size: 1.1rem;
+  color: white;
+}
+
+.progress {
+  max-width: 320px;
+  margin: 0 auto 22px;
+  padding: 16px 20px;
+  border-radius: 999px;
+  text-align: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #eef4ff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+.feedback {
+  min-height: 52px;
+  margin-top: 16px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .hidden {

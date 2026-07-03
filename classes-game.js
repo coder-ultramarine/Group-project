@@ -538,15 +538,17 @@ function renderQuestion() {
   currentQuestion.correctDisplayIndex = shuffledOptions.findIndex((item) => item.originalIndex === currentQuestion.correctAnswer);
 
   questionEl.textContent = currentQuestion.question;
-  progressTextEl.textContent = `Question ${quizState.currentQuestionIndex + 1} / ${quizState.questions.length}`;
+  progressTextEl.textContent = `Question ${quizState.currentQuestionIndex + 1} of ${quizState.questions.length}`;
   scoreEl.textContent = quizState.score;
   feedbackEl.textContent = '';
   nextButtonEl.classList.add('hidden');
   optionsEl.innerHTML = '';
 
+  const answerLabels = ['A', 'B', 'C', 'D'];
   currentQuestion.displayOptions.forEach((option, index) => {
     const button = document.createElement('button');
     button.className = 'option-btn';
+    button.dataset.label = answerLabels[index] || '';
     button.textContent = option;
     button.addEventListener('click', () => checkAnswer(index));
     optionsEl.appendChild(button);
