@@ -127,25 +127,25 @@ function attachQuizLoader() {
   document.getElementById('closeQuizBtn')?.addEventListener('click', closeQuizPage);
 }
 
-function ensureLibraryGamesInLibrary(user) {
+function ensureSteamGamesInLibrary(user) {
   if (!user || !Array.isArray(window.GAMES) || !window.GAMES.length) {
     return;
   }
 
   const existingTitles = new Set(user.games.map((game) => game.title.toLowerCase()));
-  const libraryGames = window.GAMES
+  const steamGames = window.GAMES
     .filter((game) => !existingTitles.has(game.title.toLowerCase()))
     .slice(0, 24)
     .map((game, index) => ({
-      id: `keam-${index + 1}`,
+      id: `steam-${index + 1}`,
       title: game.title,
       genre: (game.genres || []).slice(0, 2).join(', '),
       year: game.releaseYear || 2020,
       status: 'Installed'
     }));
 
-  if (libraryGames.length) {
-    user.games = [...libraryGames, ...user.games];
+  if (steamGames.length) {
+    user.games = [...steamGames, ...user.games];
     saveState();
   }
 }

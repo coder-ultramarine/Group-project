@@ -61,9 +61,7 @@
   .answers-grid {
     grid-template-columns: 1fr; /* Stack buttons vertically on mobile phones */
   }
-<<<<<<< Updated upstream
 }
-=======
 }
 :root {
   --bg: #050816;
@@ -93,7 +91,7 @@ body {
     linear-gradient(140deg, #060b17 0%, #101b37 45%, #1d2a4a 100%);
 }
 
-.app-shell {
+.quiz-shell {
   min-height: 100vh;
   padding: 32px 20px;
   display: grid;
@@ -393,4 +391,4 @@ body {
     padding: 20px 18px;
   }
 }
->>>>>>> Stashed changes
+
