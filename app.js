@@ -287,6 +287,43 @@ function addGame(title, genre, year) {
   return true;
 }
 
+<<<<<<< Updated upstream
+=======
+function clearLibrary() {
+  const user = getCurrentUser();
+  if (!user) {
+    setNotice('Please sign in first.', true);
+    return false;
+  }
+
+  user.games = [];
+  saveState();
+  setNotice('Your game library has been cleared.', false);
+  render();
+  return true;
+}
+
+function deinstallGame(gameId) {
+  const user = getCurrentUser();
+  if (!user) {
+    setNotice('Please sign in first.', true);
+    return false;
+  }
+
+  const game = user.games.find((item) => item.id === gameId);
+  if (!game) {
+    setNotice('Game not found.', true);
+    return false;
+  }
+
+  game.status = 'Not installed';
+  saveState();
+  setNotice(`${game.title} was deinstalled.`, false);
+  render();
+  return true;
+}
+
+>>>>>>> Stashed changes
 function addFriend(friendName) {
   const user = getCurrentUser();
   const name = friendName.trim().toLowerCase();
@@ -597,8 +634,7 @@ function renderMainPage() {
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-badge">KE</div>
-          <div>KEAM<br>Library</div>
+          KEAM Library
         </div>
 
         <div class="sidebar-card">
@@ -661,9 +697,16 @@ function renderMainPage() {
             <div class="game-list">
               ${filteredGames.length ? filteredGames.map((game) => `
                 <div class="game-card">
-                  <strong>${game.title}</strong>
-                  <div class="meta">${game.genre} � ${game.year}</div>
-                  <span class="tag">${game.status}</span>
+                  <div class="game-card-body">
+                    <div>
+                      <strong>${game.title}</strong>
+                      <div class="meta">${game.genre} � ${game.year}</div>
+                    </div>
+                    <div class="game-card-actions">
+                      <span class="tag ${game.status === 'Installed' ? 'tag-installed' : 'tag-uninstalled'}">${game.status}</span>
+                      ${game.status === 'Installed' ? `<button class="btn btn-small btn-warning" data-deinstall-game="${game.id}" type="button">Deinstall</button>` : ''}
+                    </div>
+                  </div>
                 </div>
               `).join('') : '<div class="game-card"><strong>No games found</strong><div class="muted">Add a game to start building your collection.</div></div>'}
             </div>
@@ -746,6 +789,12 @@ function renderMainPage() {
     state.searchTerm = '';
     document.getElementById('search-input').value = '';
     render();
+  });
+
+  document.querySelectorAll('[data-deinstall-game]').forEach((button) => {
+    button.addEventListener('click', () => {
+      deinstallGame(button.getAttribute('data-deinstall-game'));
+    });
   });
 
   document.getElementById('friend-form').addEventListener('submit', (event) => {
